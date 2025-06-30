@@ -47,7 +47,7 @@ export const INVOLUCRADOS: Personaje[] = [
     id: '76224287', 
     name: 'Briyit Paola Taboada Huamán', 
     role: 'Víctima', 
-    image: '/imagen/briyit.jpeg',
+    image: '/imagen/briyit.webp',
     details: {
         dni: '76224287',
         dateOfBirth: '07-12-1998',
@@ -60,7 +60,7 @@ export const INVOLUCRADOS: Personaje[] = [
     id: '75154798', 
     name: 'Jesús Nicolas Rojas Licas', 
     role: 'Acusado', 
-    image: '/imagen/jesus.jpeg',
+    image: '/imagen/jesus.webp',
     details: {
         dni: '75154798',
         dateOfBirth: '24-12-1997',
