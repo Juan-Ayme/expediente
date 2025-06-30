@@ -1,6 +1,7 @@
 import ExpedienteHeader from '@/components/ExpedienteHeader'
 import ResumenExpediente from '@/components/ResumenExpediente'
 import DocumentosSection from '@/components/DocumentosSection'
+import MakingOfSection from '@/components/MakingOfSection';
 
 export default function Home() {
   return (
@@ -9,6 +10,7 @@ export default function Home() {
         <ExpedienteHeader />
         <ResumenExpediente />
         <DocumentosSection />
+        <MakingOfSection />
       </div>
     </div>
   );

@@ -73,21 +73,21 @@ export const INVOLUCRADOS: Personaje[] = [
     id: 'testigo-ruth', 
     name: 'Ruth Marisol Uriburu', 
     role: 'Testigo', 
-    image: '/imagen/personaje/ruth.jpeg',
+    image: '/imagen/personaje/ruth.webp',
     details: { dni: '75932272', dateOfBirth: 'N/A', maritalStatus: 'N/A', education: 'N/A', location: 'Jr. Abraham Valdelomar N° 300-Kimbiri' }
   },
   { 
     id: 'testigo-sidney', 
     name: 'Jhoseline Sidney Tarrillo', 
     role: 'Testigo', 
-    image: '/imagen/personaje/sidney.jpeg',
+    image: '/imagen/personaje/sidney.webp',
     details: { dni: '71095380', dateOfBirth: 'N/A', maritalStatus: 'N/A', education: 'N/A', location: 'Jr. Abraham Valdelomar N° 22 - Kimbiri' }
   },
   {
     id: 'testigo-albina',
     name: 'Albina Huamán Chávez',
     role: 'Testigo',
-    image: '/imagen/personaje/mama.jpeg',
+    image: '/imagen/personaje/mama.webp',
     details: { dni: '38678309', dateOfBirth: 'N/A', maritalStatus: 'N/A', education: 'N/A', location: 'Sector J.C.M. Mz B lt 10, Kimbiri' }
   }
 ];
