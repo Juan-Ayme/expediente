@@ -145,13 +145,37 @@ function DocumentCard({ document, onSelect, isMobile, delay = 0 }: { document: E
 
 // --- SECCIÓN DE COMPONENTES DE MODALES ---
 
+// --- SECCIÓN DE COMPONENTES DE MODALES --- (REEMPLAZA TU VideoModal CON ESTE)
+
 function VideoModal({ video, onClose }: { video: VideoData, onClose: () => void }) {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Para guardar el temporizador
+
     const [isPlaying, setIsPlaying] = useState(true);
     const [isMuted, setIsMuted] = useState(false);
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
-    const [showControls, setShowControls] = useState(true);
+    const [showControls, setShowControls] = useState(true); // Empezar mostrando los controles
+
+    // --- LÓGICA MEJORADA PARA OCULTAR CONTROLES ---
+    useEffect(() => {
+        // Si el video se está reproduciendo y los controles están visibles,
+        // programa un temporizador para ocultarlos después de 3 segundos.
+        if (isPlaying && showControls) {
+            controlsTimeoutRef.current = setTimeout(() => {
+                setShowControls(false);
+            }, 3000);
+        }
+
+        // Limpia el temporizador si el video se pausa, se cierran los controles,
+        // o el componente se desmonta.
+        return () => {
+            if (controlsTimeoutRef.current) {
+                clearTimeout(controlsTimeoutRef.current);
+            }
+        };
+    }, [isPlaying, showControls]);
+
 
     useEffect(() => {
         const handleEsc = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
@@ -159,25 +183,98 @@ function VideoModal({ video, onClose }: { video: VideoData, onClose: () => void 
         return () => window.removeEventListener('keydown', handleEsc);
     }, [onClose]);
 
+    // --- FUNCIONES DE CONTROL ---
     const formatTime = (time: number) => new Date(time * 1000).toISOString().substr(14, 5);
-    const togglePlayPause = () => { if (videoRef.current) { isPlaying ? videoRef.current.pause() : videoRef.current.play(); setIsPlaying(!isPlaying); }};
-    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => { if(videoRef.current) videoRef.current.currentTime = Number(e.target.value); };
+    
+    const togglePlayPause = () => {
+        if (videoRef.current) {
+            isPlaying ? videoRef.current.pause() : videoRef.current.play();
+            setIsPlaying(!isPlaying);
+        }
+    };
+    
+    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if(videoRef.current) videoRef.current.currentTime = Number(e.target.value);
+    };
 
+    // --- NUEVA FUNCIÓN PARA MOSTRAR/OCULTAR CONTROLES AL TOCAR ---
+    const handleVideoClick = () => {
+        // Al tocar el video, muestra los controles. El useEffect se encargará de ocultarlos.
+        setShowControls(true);
+        // Si hay un temporizador activo, lo reiniciamos.
+        if (controlsTimeoutRef.current) {
+            clearTimeout(controlsTimeoutRef.current);
+        }
+    };
+    
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} onClick={(e) => e.stopPropagation()} onMouseEnter={() => setShowControls(true)} onMouseLeave={() => setShowControls(false)} className="relative overflow-hidden rounded-lg shadow-2xl">
-                <video ref={videoRef} src={video.src} autoPlay muted={isMuted} onLoadedMetadata={() => setDuration(videoRef.current?.duration || 0)} onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)} onEnded={() => setIsPlaying(false)} onClick={togglePlayPause} className="max-w-[95vw] max-h-[95vh] w-auto h-auto rounded-lg" />
-                <AnimatePresence>{showControls && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="absolute inset-0 flex flex-col justify-between">
-                    <header className="flex items-center justify-between p-4 bg-gradient-to-b from-black/60 to-transparent"><h3 className="font-semibold text-white">{video.title}</h3><button onClick={onClose} className="p-2 rounded-full text-white bg-black/30 hover:bg-white/20"><X size={20} /></button></header>
-                    {!isPlaying && (<div className="flex-grow flex items-center justify-center"><button onClick={togglePlayPause} className="p-5 rounded-full bg-black/50 hover:bg-primary transition-colors"><Play size={32} fill="white" className="text-white"/></button></div>)}
-                    <footer className="p-4 space-y-3 bg-gradient-to-t from-black/60 to-transparent">
-                        <input type="range" min="0" max={duration} value={currentTime} onChange={handleSeek} className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer range-sm accent-primary" />
-                        <div className="flex justify-between items-center text-white">
-                            <div className="flex items-center gap-4"><button onClick={togglePlayPause}>{isPlaying ? <Pause size={20} fill="white"/> : <Play size={20} fill="white"/>}</button><button onClick={() => setIsMuted(!isMuted)}>{isMuted ? <VolumeX size={20}/> : <Volume2 size={20}/>}</button><span className="font-mono text-xs">{formatTime(currentTime)} / {formatTime(duration)}</span></div>
-                            <button onClick={() => videoRef.current?.requestFullscreen()}><Maximize2 size={20} /></button>
-                        </div>
-                    </footer>
-                </motion.div>)}</AnimatePresence>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-0 sm:p-4">
+            {/* El contenedor ahora se encarga de mostrar/ocultar controles al hacer clic/tocar */}
+            <motion.div 
+                initial={{ scale: 0.8 }} 
+                animate={{ scale: 1 }} 
+                exit={{ scale: 0.8 }} 
+                onClick={(e) => e.stopPropagation()} 
+                className="relative overflow-hidden rounded-none sm:rounded-lg shadow-2xl w-full h-full bg-black"
+            >
+                {/* 1. Añadimos playsinline y controls={false} */}
+                {/* 2. El onClick principal ahora maneja la visibilidad de los controles */}
+                <video 
+                    ref={videoRef} 
+                    src={video.src} 
+                    autoPlay 
+                    playsInline  // <-- LA CLAVE PARA iOS
+                    controls={false} // <-- Asegura que no aparezcan controles nativos
+                    muted={isMuted} 
+                    onLoadedMetadata={() => setDuration(videoRef.current?.duration || 0)} 
+                    onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)} 
+                    onEnded={() => setIsPlaying(false)} 
+                    onClick={handleVideoClick} // <-- Lógica de clic mejorada
+                    className="w-full h-full object-contain" // object-contain para que se vea completo
+                />
+
+                {/* La capa de controles no ha cambiado mucho, pero ahora se activa por `showControls` */}
+                <AnimatePresence>
+                    {showControls && (
+                        <motion.div 
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }} 
+                            exit={{ opacity: 0 }} 
+                            transition={{ duration: 0.2 }} 
+                            className="absolute inset-0 flex flex-col justify-between pointer-events-none" // pointer-events-none para que el clic llegue al video
+                        >
+                            {/* Header y Footer necesitan `pointer-events-auto` para ser clickables */}
+                            <header className="flex items-center justify-between p-4 bg-gradient-to-b from-black/60 to-transparent pointer-events-auto">
+                                <h3 className="font-semibold text-white">{video.title}</h3>
+                                <button onClick={onClose} className="p-2 rounded-full text-white bg-black/30 hover:bg-white/20">
+                                    <X size={20} />
+                                </button>
+                            </header>
+                            
+                            {/* Botón de play central (solo si está pausado) */}
+                            {!isPlaying && (
+                                <div className="flex-grow flex items-center justify-center pointer-events-auto">
+                                    <button onClick={togglePlayPause} className="p-5 rounded-full bg-black/50 hover:bg-primary transition-colors">
+                                        <Play size={32} fill="white" className="text-white"/>
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Controles inferiores */}
+                            <footer className="p-4 space-y-3 bg-gradient-to-t from-black/60 to-transparent pointer-events-auto">
+                                <input type="range" min="0" max={duration} value={currentTime} onChange={handleSeek} className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer range-sm accent-primary" />
+                                <div className="flex justify-between items-center text-white">
+                                    <div className="flex items-center gap-4">
+                                        <button onClick={togglePlayPause}>{isPlaying ? <Pause size={20} fill="white"/> : <Play size={20} fill="white"/>}</button>
+                                        <button onClick={() => setIsMuted(!isMuted)}>{isMuted ? <VolumeX size={20}/> : <Volume2 size={20}/>}</button>
+                                        <span className="font-mono text-xs">{formatTime(currentTime)} / {formatTime(duration)}</span>
+                                    </div>
+                                    <button onClick={() => videoRef.current?.requestFullscreen()}><Maximize2 size={20} /></button>
+                                </div>
+                            </footer>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </motion.div>
         </motion.div>
     );
