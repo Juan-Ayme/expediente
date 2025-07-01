@@ -24,7 +24,7 @@ type VideoData = {
 const videosDeResumen: VideoData[] = [
   {
     title: 'Documental desde YouTube',
-    poster: '/videos/thumbnails/video1.png', // Aún necesitas un póster local
+    poster: '/videos/thumbnails/video5.png', // Aún necesitas un póster local
     youtubeId: '5qEg7CxNL6w' // ID del video de YouTube que funcionó
   },
     {
